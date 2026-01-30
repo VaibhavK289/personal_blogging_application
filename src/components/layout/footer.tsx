@@ -1,149 +1,157 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Sparkles, Github, Twitter, Linkedin, Mail, ArrowRight } from 'lucide-react';
-import { FadeIn, StaggerContainer, StaggerItem } from '@/components/motion';
-
-const footerLinks = {
-  navigation: [
-    { href: '/', label: 'Home' },
-    { href: '/blog', label: 'Blog' },
-    { href: '/archive', label: 'Archive' },
-    { href: '/about', label: 'About' },
-  ],
-  categories: [
-    { href: '/category/technology', label: 'Technology' },
-    { href: '/category/design', label: 'Design' },
-    { href: '/category/productivity', label: 'Productivity' },
-    { href: '/category/thoughts', label: 'Thoughts' },
-  ],
-};
+import { Github, Linkedin, Mail, Globe, Heart } from 'lucide-react';
+import { FadeIn } from '@/components/motion';
 
 const socialLinks = [
-  { href: 'https://github.com', icon: Github, label: 'GitHub' },
-  { href: 'https://twitter.com', icon: Twitter, label: 'Twitter' },
-  { href: 'https://linkedin.com', icon: Linkedin, label: 'LinkedIn' },
-  { href: 'mailto:hello@blog.com', icon: Mail, label: 'Email' },
+  {
+    name: 'GitHub',
+    href: 'https://github.com/VaibhavK289',
+    icon: Github,
+  },
+  {
+    name: 'LinkedIn',
+    href: 'https://linkedin.com/in/vaibhavkumarkandhway',
+    icon: Linkedin,
+  },
+  {
+    name: 'Portfolio',
+    href: 'https://vaibhavkandhway.dev',
+    icon: Globe,
+  },
+  {
+    name: 'Email',
+    href: 'mailto:vaibhav.kumar.kandhway@gmail.com',
+    icon: Mail,
+  },
+];
+
+const quickLinks = [
+  { name: 'Home', href: '/' },
+  { name: 'Blog', href: '/blog' },
+  { name: 'Archive', href: '/archive' },
+  { name: 'About', href: '/about' },
 ];
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="relative mt-auto border-t border-border/50">
-      {/* Gradient background */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(180deg, transparent 0%, oklch(0.14 0.02 260 / 0.5) 100%)',
-        }}
-      />
-      
-      <div className="container mx-auto px-4 md:px-6 py-16 relative">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          {/* Brand & Newsletter */}
-          <FadeIn delay={0} className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
+    <footer className="relative border-t border-border/30 bg-card/30">
+      <div className="container mx-auto px-4 md:px-6 py-16">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+          {/* Brand */}
+          <FadeIn className="lg:col-span-2">
+            <Link href="/" className="inline-flex items-center gap-3 mb-4">
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden">
+                <Image 
+                  src="/logo.png" 
+                  alt="VK" 
+                  fill 
+                  className="object-cover"
+                />
               </div>
-              <span 
-                className="text-xl font-bold tracking-tight"
-                style={{ fontFamily: 'var(--font-outfit)' }}
-              >
-                Personal<span className="text-gradient">Blog</span>
+              <span className="text-xl font-medium">
+                <span className="text-foreground">VK</span>
+                <span className="text-muted-foreground ml-1">Blog</span>
               </span>
             </Link>
-            <p className="text-muted-foreground mb-6 max-w-md">
-              Join the newsletter to receive the latest articles, insights, and updates directly in your inbox.
+            <p className="text-muted-foreground max-w-sm mb-6 leading-relaxed">
+              Exploring technology, design, and creativity. Sharing thoughts and ideas
+              on building better digital experiences.
             </p>
             
-            {/* Newsletter Form */}
-            <form className="flex gap-2 max-w-md">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="bg-card/50 border-border/50 focus:border-primary"
-              />
-              <Button 
-                type="submit"
-                className="bg-gradient-primary hover:opacity-90 text-white shrink-0"
-              >
-                <span className="hidden sm:inline">Subscribe</span>
-                <ArrowRight className="w-4 h-4 sm:ml-2" />
-              </Button>
-            </form>
+            {/* Social Links */}
+            <div className="flex items-center gap-3">
+              {socialLinks.map((social) => (
+                <motion.a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-10 h-10 rounded-xl bg-card border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
+                  aria-label={social.name}
+                >
+                  <social.icon className="w-4 h-4" />
+                </motion.a>
+              ))}
+            </div>
           </FadeIn>
 
-          {/* Navigation Links */}
+          {/* Quick Links */}
           <FadeIn delay={0.1}>
-            <h3 
-              className="font-semibold mb-4 text-foreground"
-              style={{ fontFamily: 'var(--font-outfit)' }}
-            >
+            <h4 className="text-sm font-medium uppercase tracking-wider text-muted-foreground mb-4">
               Navigation
-            </h3>
+            </h4>
             <ul className="space-y-3">
-              {footerLinks.navigation.map((link) => (
-                <li key={link.href}>
+              {quickLinks.map((link) => (
+                <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-foreground/80 hover:text-primary transition-colors link-underline"
                   >
-                    {link.label}
+                    {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </FadeIn>
 
-          {/* Categories */}
+          {/* Contact */}
           <FadeIn delay={0.2}>
-            <h3 
-              className="font-semibold mb-4 text-foreground"
-              style={{ fontFamily: 'var(--font-outfit)' }}
-            >
-              Categories
-            </h3>
+            <h4 className="text-sm font-medium uppercase tracking-wider text-muted-foreground mb-4">
+              Connect
+            </h4>
             <ul className="space-y-3">
-              {footerLinks.categories.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <a
+                  href="mailto:vaibhav.kumar.kandhway@gmail.com"
+                  className="text-foreground/80 hover:text-primary transition-colors"
+                >
+                  Email Me
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://vaibhavkandhway.dev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground/80 hover:text-primary transition-colors"
+                >
+                  Portfolio
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/VaibhavK289"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground/80 hover:text-primary transition-colors"
+                >
+                  Open Source
+                </a>
+              </li>
             </ul>
           </FadeIn>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Personal Blog. All rights reserved.
-          </p>
-          
-          {/* Social Links */}
-          <div className="flex items-center gap-4">
-            {socialLinks.map((social) => (
-              <motion.a
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={social.label}
-              >
-                <social.icon className="w-5 h-5" />
-              </motion.a>
-            ))}
-          </div>
+        {/* Bottom */}
+        <div className="mt-16 pt-8 border-t border-border/30">
+          <FadeIn>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+              <p>
+                © {currentYear} Vaibhav Kumar Kandhway. All rights reserved.
+              </p>
+              <p className="flex items-center gap-1">
+                Made with <Heart className="w-3 h-3 text-primary fill-primary" /> and lots of coffee
+              </p>
+            </div>
+          </FadeIn>
         </div>
       </div>
     </footer>

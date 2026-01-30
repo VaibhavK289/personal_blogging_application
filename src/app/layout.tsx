@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit, JetBrains_Mono } from "next/font/google";
+import { Inter, Playfair_Display, JetBrains_Mono } from "next/font/google";
 import { Analytics } from '@vercel/analytics/react';
 import "./globals.css";
 import { Header } from "@/components/layout/header";
@@ -12,8 +12,8 @@ const inter = Inter({
   display: 'swap',
 });
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
   display: 'swap',
 });
@@ -26,24 +26,24 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Personal Blog | Thoughts & Ideas",
-    template: "%s | Personal Blog"
+    default: "VK Blog | Thoughts & Ideas",
+    template: "%s | VK Blog"
   },
-  description: "A personal blogging platform for writing entries, sharing insights, and summarizing articles. Focused on content creation, organization, and reader engagement.",
-  keywords: ["blog", "personal blog", "writing", "articles", "essays", "technology"],
-  authors: [{ name: "Blog Author" }],
-  creator: "Personal Blog Platform",
+  description: "A personal blog by Vaibhav Kumar Kandhway - exploring technology, design, and creative ideas.",
+  keywords: ["blog", "personal blog", "technology", "design", "web development", "Vaibhav Kandhway"],
+  authors: [{ name: "Vaibhav Kumar Kandhway" }],
+  creator: "Vaibhav Kumar Kandhway",
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: "Personal Blog | Thoughts & Ideas",
-    description: "A personal blogging platform for writing entries, sharing insights, and summarizing articles.",
-    siteName: "Personal Blog",
+    title: "VK Blog | Thoughts & Ideas",
+    description: "A personal blog by Vaibhav Kumar Kandhway - exploring technology, design, and creative ideas.",
+    siteName: "VK Blog",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Personal Blog | Thoughts & Ideas",
-    description: "A personal blogging platform for writing entries, sharing insights, and summarizing articles.",
+    title: "VK Blog | Thoughts & Ideas",
+    description: "A personal blog by Vaibhav Kumar Kandhway - exploring technology, design, and creative ideas.",
   },
   robots: {
     index: true,
@@ -59,10 +59,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${outfit.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col`}
-        style={{ fontFamily: 'var(--font-inter)' }}
+        className={`${inter.variable} ${playfair.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col bg-background`}
       >
-        <NoiseOverlay opacity={0.02} />
+        <NoiseOverlay opacity={0.015} />
         <Header />
         <main className="flex-1">
           {children}

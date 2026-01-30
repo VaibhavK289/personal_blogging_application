@@ -43,14 +43,16 @@ function FloatingShape({
 function Particles({ count = 100 }) {
   const points = useRef<THREE.Points>(null);
   
-  const particlesPosition = useMemo(() => {
+  const geometry = useMemo(() => {
+    const geo = new THREE.BufferGeometry();
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 15;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 15;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 15;
     }
-    return positions;
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return geo;
   }, [count]);
 
   useFrame((state) => {
@@ -61,15 +63,7 @@ function Particles({ count = 100 }) {
   });
 
   return (
-    <points ref={points}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={particlesPosition}
-          itemSize={3}
-        />
-      </bufferGeometry>
+    <points ref={points} geometry={geometry}>
       <pointsMaterial
         size={0.03}
         color="#a78bfa"

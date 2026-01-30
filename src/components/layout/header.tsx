@@ -1,11 +1,17 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, X, Search, Sparkles } from 'lucide-react';
+import { SearchDialog } from '@/components/search-dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -22,70 +28,66 @@ export function Header() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'glass py-3'
-          : 'bg-transparent py-5'
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled 
+          ? 'py-3 glass border-b border-border/30' 
+          : 'py-5 bg-transparent'
       }`}
     >
       <div className="container mx-auto px-4 md:px-6">
         <nav className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="group flex items-center gap-2">
+          <Link href="/" className="group flex items-center gap-3">
             <motion.div
-              whileHover={{ rotate: 180 }}
-              transition={{ duration: 0.5 }}
-              className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+              className="relative w-10 h-10 rounded-xl overflow-hidden"
             >
-              <Sparkles className="w-5 h-5 text-white" />
+              <Image 
+                src="/logo.png" 
+                alt="VK" 
+                fill 
+                className="object-cover"
+                priority
+              />
             </motion.div>
-            <span 
-              className="text-xl font-bold tracking-tight hidden sm:block"
-              style={{ fontFamily: 'var(--font-outfit)' }}
-            >
-              Personal<span className="text-gradient">Blog</span>
+            <span className="text-lg font-medium tracking-tight hidden sm:block">
+              <span className="text-foreground">VK</span>
+              <span className="text-muted-foreground ml-1">Blog</span>
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+                className="relative text-sm text-muted-foreground hover:text-foreground transition-colors link-underline py-1"
               >
                 {link.label}
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-primary group-hover:w-1/2 transition-all duration-300" />
               </Link>
             ))}
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-3">
-            {/* Search Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Search"
-            >
-              <Search className="w-5 h-5" />
-            </Button>
+            {/* Search */}
+            <SearchDialog />
 
-            {/* CTA Button - Desktop */}
+            {/* Subscribe Button - Desktop */}
             <Button
-              className="hidden sm:inline-flex bg-gradient-primary hover:opacity-90 transition-opacity text-white border-0"
+              className="hidden sm:inline-flex bg-gradient-primary hover:opacity-90 transition-opacity text-primary-foreground border-0 rounded-full px-6"
+              size="sm"
             >
               Subscribe
             </Button>
@@ -93,12 +95,19 @@ export function Header() {
             {/* Mobile Menu */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="text-foreground">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] glass border-border/50">
-                <nav className="flex flex-col gap-4 mt-8">
+              <SheetContent side="right" className="w-[280px] glass-strong border-border/50 p-6">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+                    <Image src="/logo.png" alt="VK" fill className="object-cover" />
+                  </div>
+                  <span className="text-lg font-medium">VK Blog</span>
+                </div>
+                
+                <nav className="flex flex-col gap-2">
                   {navLinks.map((link, index) => (
                     <motion.div
                       key={link.href}
@@ -109,24 +118,24 @@ export function Header() {
                       <Link
                         href={link.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="block text-lg font-medium py-2 text-foreground hover:text-primary transition-colors"
-                        style={{ fontFamily: 'var(--font-outfit)' }}
+                        className="block text-lg py-3 text-foreground hover:text-primary transition-colors border-b border-border/30"
                       >
                         {link.label}
                       </Link>
                     </motion.div>
                   ))}
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: navLinks.length * 0.1 }}
-                    className="pt-4"
-                  >
-                    <Button className="w-full bg-gradient-primary text-white">
-                      Subscribe
-                    </Button>
-                  </motion.div>
                 </nav>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navLinks.length * 0.1 }}
+                  className="mt-8"
+                >
+                  <Button className="w-full bg-gradient-primary text-primary-foreground rounded-full">
+                    Subscribe
+                  </Button>
+                </motion.div>
               </SheetContent>
             </Sheet>
           </div>
