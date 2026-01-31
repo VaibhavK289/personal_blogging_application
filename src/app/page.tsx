@@ -1,270 +1,441 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowRight, Calendar, Clock, BookOpen, Sparkles, Code, Palette, Lightbulb } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Canvas } from '@react-three/fiber';
+import { PerspectiveCamera, Preload } from '@react-three/drei';
+import { motion } from 'framer-motion';
+import { ArrowRight, ArrowDown, Copy, Check, Mail, MapPin, Code, Palette, Lightbulb, Github, Linkedin, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { FadeIn, StaggerContainer, StaggerItem } from '@/components/motion';
-import { GradientMesh, GradientMeshMobile } from '@/components/hero';
 
-// Sample featured posts
+// Dynamic imports for Three.js components
+const HeroCamera = dynamic(
+  () => import('@/components/three/hero-camera').then(mod => mod.HeroCamera),
+  { ssr: false }
+);
+
+const AnimatedRings = dynamic(
+  () => import('@/components/three/animated-rings').then(mod => mod.AnimatedRings),
+  { ssr: false }
+);
+
+const FloatingCube = dynamic(
+  () => import('@/components/three/floating-cube').then(mod => mod.FloatingCube),
+  { ssr: false }
+);
+
+const AnimatedTarget = dynamic(
+  () => import('@/components/three/animated-target').then(mod => mod.AnimatedTarget),
+  { ssr: false }
+);
+
+// Tech stack
+const techStack = [
+  { name: 'React', icon: '⚛️' },
+  { name: 'Next.js', icon: '▲' },
+  { name: 'TypeScript', icon: '🔷' },
+  { name: 'Three.js', icon: '🎮' },
+  { name: 'TailwindCSS', icon: '🎨' },
+  { name: 'Node.js', icon: '🟢' },
+];
+
+// Featured posts
 const featuredPosts = [
   {
     slug: 'building-modern-web-apps',
     title: 'Building Modern Web Applications',
-    excerpt: 'Exploring the latest patterns and practices in frontend development with React and Next.js.',
+    excerpt: 'Exploring the latest patterns and practices in frontend development.',
     category: 'Development',
-    readTime: '8 min',
     date: 'Jan 25, 2026',
-    image: '/images/placeholder-1.jpg',
   },
   {
     slug: 'design-systems-at-scale',
     title: 'Design Systems at Scale',
-    excerpt: 'How to create and maintain design systems that grow with your product.',
+    excerpt: 'How to create design systems that grow with your product.',
     category: 'Design',
-    readTime: '6 min',
     date: 'Jan 20, 2026',
-    image: '/images/placeholder-2.jpg',
   },
   {
     slug: 'the-future-of-ai',
     title: 'The Future of AI in Development',
-    excerpt: 'How artificial intelligence is transforming the way we build software.',
+    excerpt: 'How AI is transforming the way we build software.',
     category: 'Technology',
-    readTime: '10 min',
     date: 'Jan 15, 2026',
-    image: '/images/placeholder-3.jpg',
   },
-];
-
-const categories = [
-  { name: 'Development', icon: Code, count: 12 },
-  { name: 'Design', icon: Palette, count: 8 },
-  { name: 'Ideas', icon: Lightbulb, count: 15 },
 ];
 
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  });
-  
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const heroY = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
+  const [hasCopied, setHasCopied] = useState(false);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText('vaibhav@example.com');
+    setHasCopied(true);
+    setTimeout(() => setHasCopied(false), 2000);
+  };
+
   return (
-    <div className="relative">
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* Background */}
-        {isMobile ? <GradientMeshMobile /> : <GradientMesh />}
-        
-        {/* Content */}
-        <motion.div 
-          className="relative z-10 container mx-auto px-4 md:px-6 text-center"
-          style={{ opacity: heroOpacity, y: heroY }}
-        >
-          <FadeIn delay={0.2}>
-            <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Welcome to VK Blog
-            </Badge>
-          </FadeIn>
+    <div className="min-h-screen">
+      {/* ==================== HERO SECTION ==================== */}
+      <section id="home" className="min-h-screen w-full flex flex-col relative">
+        {/* 3D Canvas - Full Screen Background */}
+        <div className="absolute inset-0 w-full h-full">
+          <Canvas className="w-full h-full">
+            <Suspense fallback={null}>
+              <PerspectiveCamera makeDefault position={[0, 0, 20]} />
+              <HeroCamera isMobile={isMobile}>
+                {/* Animated 3D Elements */}
+                <AnimatedRings position={[-4, 1, 0]} scale={0.6} />
+                <FloatingCube position={[5, -2, 0]} scale={0.8} />
+                <AnimatedTarget position={[-6, -3, 0]} scale={1} />
+                
+                {/* Additional floating elements */}
+                <mesh position={[4, 3, -2]}>
+                  <icosahedronGeometry args={[0.8, 1]} />
+                  <meshStandardMaterial color="#00d4ff" wireframe />
+                </mesh>
+              </HeroCamera>
+              
+              {/* Lighting */}
+              <ambientLight intensity={0.4} />
+              <directionalLight position={[10, 10, 10]} intensity={1} />
+              <pointLight position={[-10, -10, 10]} intensity={0.5} color="#00d4ff" />
+              
+              <Preload all />
+            </Suspense>
+          </Canvas>
+        </div>
 
-          <FadeIn delay={0.3}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium mb-6 tracking-tight">
-              Thoughts, Ideas &{' '}
-              <span className="text-gradient">Discoveries</span>
-            </h1>
-          </FadeIn>
-
-          <FadeIn delay={0.4}>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              Exploring the intersection of technology, design, and creativity. 
-              Join me on a journey of continuous learning and innovation.
+        {/* Hero Content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 md:px-6 pointer-events-none">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center z-10"
+          >
+            {/* Greeting */}
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-4">
+              Hi, I am Vaibhav <span className="waving-hand">👋</span>
             </p>
-          </FadeIn>
 
-          <FadeIn delay={0.5}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            {/* Main Heading */}
+            <h1 className="hero-tag text-gray-gradient mb-6">
+              Building Products &<br />
+              Digital Experiences
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8">
+              I'm a full-stack developer passionate about creating beautiful, 
+              functional web experiences with modern technologies.
+            </p>
+
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="pointer-events-auto"
+            >
               <Button
                 size="lg"
-                className="bg-gradient-primary hover:opacity-90 text-primary-foreground border-0 rounded-full px-8"
+                className="btn gap-3"
                 asChild
               >
-                <Link href="/blog">
-                  Explore Articles
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                <Link href="#about">
+                  Explore My Work
+                  <span className="relative flex h-3 w-3">
+                    <span className="btn-ping" />
+                    <span className="btn-ping-dot" />
+                  </span>
                 </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-full px-8 border-border/50 hover:bg-card"
-                asChild
-              >
-                <Link href="/about">Learn More</Link>
-              </Button>
-            </div>
-          </FadeIn>
-        </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
 
-        {/* Scroll indicator */}
+        {/* Scroll Indicator */}
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
         >
-          <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2">
-            <motion.div
-              className="w-1 h-2 bg-primary rounded-full"
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-          </div>
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="flex flex-col items-center gap-2 text-muted-foreground"
+          >
+            <span className="text-xs uppercase tracking-widest">Scroll</span>
+            <ArrowDown className="w-4 h-4" />
+          </motion.div>
         </motion.div>
       </section>
 
-      {/* Featured Posts */}
-      <section className="py-24 relative">
-        <div className="container mx-auto px-4 md:px-6">
-          <FadeIn>
-            <div className="flex items-center justify-between mb-12">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-medium mb-2">Featured Articles</h2>
-                <p className="text-muted-foreground">Latest thoughts and insights</p>
-              </div>
-              <Button variant="ghost" className="hidden sm:inline-flex link-underline" asChild>
-                <Link href="/blog">
-                  View All
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-            </div>
-          </FadeIn>
+      {/* ==================== ABOUT SECTION (BENTO GRID) ==================== */}
+      <section id="about" className="py-24 sm:px-10 px-5">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-12"
+          >
+            <p className="text-muted-foreground uppercase tracking-widest mb-2">Introduction</p>
+            <h2 className="text-4xl md:text-5xl font-medium text-gray-gradient">About Me</h2>
+          </motion.div>
 
-          <StaggerContainer className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* Bento Grid */}
+          <div className="grid xl:grid-cols-3 xl:grid-rows-6 md:grid-cols-2 grid-cols-1 gap-5 h-full">
+            {/* Card 1 - Bio */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="col-span-1 xl:row-span-3"
+            >
+              <div className="grid-container">
+                <div className="w-full rounded-2xl overflow-hidden">
+                  <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    <div className="text-6xl">👨‍💻</div>
+                  </div>
+                </div>
+                <div>
+                  <p className="grid-headtext">Hi, I'm Vaibhav Kumar Kandhway</p>
+                  <p className="grid-subtext">
+                    With a passion for full-stack development, I have honed my skills in 
+                    both frontend and backend technologies, creating dynamic and responsive 
+                    web applications.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Card 2 - Tech Stack */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="col-span-1 xl:row-span-3"
+            >
+              <div className="grid-container">
+                <p className="grid-headtext">Tech Stack</p>
+                <p className="grid-subtext mb-4">
+                  I specialize in modern technologies that allow me to build 
+                  robust and scalable applications.
+                </p>
+                <div className="grid grid-cols-3 gap-3">
+                  {techStack.map((tech) => (
+                    <div key={tech.name} className="tech-logo">
+                      <span className="text-2xl">{tech.icon}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Card 3 - Location */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="col-span-1 xl:row-span-4"
+            >
+              <div className="grid-container h-full">
+                <p className="grid-headtext flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-primary" />
+                  Location
+                </p>
+                <p className="grid-subtext">
+                  I'm flexible with time zone communications & locations.
+                </p>
+                {/* Globe placeholder */}
+                <div className="flex-1 min-h-[200px] rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+                  <Globe className="w-24 h-24 text-primary/30" />
+                </div>
+                <p className="text-center text-muted-foreground text-sm">
+                  Based in India · Open to remote work worldwide
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Card 4 - Passion */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="xl:col-span-2 xl:row-span-3"
+            >
+              <div className="grid-container">
+                <p className="grid-headtext">My Passion for Coding</p>
+                <p className="grid-subtext">
+                  I love solving problems and building things through code. Programming isn't 
+                  just my profession—it's my passion. I enjoy exploring new technologies, 
+                  contributing to open-source projects, and enhancing my skills every day.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Card 5 - Contact */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="xl:col-span-1 xl:row-span-2"
+            >
+              <div className="grid-container">
+                <p className="grid-headtext flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-primary" />
+                  Contact Me
+                </p>
+                <div 
+                  className="copy-container mt-4"
+                  onClick={handleCopyEmail}
+                >
+                  <div className="flex items-center gap-3 bg-secondary/50 px-4 py-3 rounded-lg w-full">
+                    {hasCopied ? (
+                      <Check className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <Copy className="w-5 h-5 text-muted-foreground" />
+                    )}
+                    <span className="text-sm text-muted-foreground">
+                      {hasCopied ? 'Email copied!' : 'vaibhav@example.com'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== BLOG SECTION ==================== */}
+      <section id="blog" className="py-24 sm:px-10 px-5 bg-card/30">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex items-center justify-between mb-12"
+          >
+            <div>
+              <p className="text-muted-foreground uppercase tracking-widest mb-2">My Thoughts</p>
+              <h2 className="text-4xl md:text-5xl font-medium text-gray-gradient">Latest Articles</h2>
+            </div>
+            <Button variant="ghost" className="hidden sm:flex gap-2" asChild>
+              <Link href="/blog">
+                View All <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Button>
+          </motion.div>
+
+          {/* Blog Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredPosts.map((post, index) => (
-              <StaggerItem key={post.slug}>
-                <Link href={`/blog/${post.slug}`} className="group block">
-                  <article className="relative h-full rounded-2xl border border-border/50 bg-card/50 overflow-hidden hover-lift hover-glow transition-all duration-300">
-                    {/* Image placeholder */}
-                    <div className="aspect-[16/10] relative bg-gradient-subtle overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-primary opacity-20" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <BookOpen className="w-12 h-12 text-primary/40" />
-                      </div>
-                    </div>
+              <motion.div
+                key={post.slug}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Link href={`/blog/${post.slug}`} className="block group">
+                  <article className="grid-container group-hover:border-primary/50 transition-colors">
+                    {/* Category */}
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-primary/10 text-primary w-fit">
+                      {post.category}
+                    </span>
                     
-                    {/* Content */}
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-3">
-                        <Badge variant="secondary" className="text-xs">
-                          {post.category}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {post.readTime}
-                        </span>
-                      </div>
-                      
-                      <h3 className="text-xl font-medium mb-2 group-hover:text-primary transition-colors">
-                        {post.title}
-                      </h3>
-                      
-                      <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
-                        {post.excerpt}
-                      </p>
-                      
-                      <div className="flex items-center text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {post.date}
-                      </div>
-                    </div>
+                    {/* Title */}
+                    <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
+                      {post.title}
+                    </h3>
+                    
+                    {/* Excerpt */}
+                    <p className="text-muted-foreground text-sm line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                    
+                    {/* Date */}
+                    <p className="text-xs text-muted-foreground mt-auto">
+                      {post.date}
+                    </p>
                   </article>
                 </Link>
-              </StaggerItem>
+              </motion.div>
             ))}
-          </StaggerContainer>
+          </div>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="py-24 relative bg-gradient-subtle">
-        <div className="container mx-auto px-4 md:px-6">
-          <FadeIn>
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-medium mb-2">Explore Topics</h2>
-              <p className="text-muted-foreground">Dive into different areas of interest</p>
-            </div>
-          </FadeIn>
+      {/* ==================== CONTACT SECTION ==================== */}
+      <section id="contact" className="py-24 sm:px-10 px-5">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <p className="text-muted-foreground uppercase tracking-widest mb-2">Get in Touch</p>
+            <h2 className="text-4xl md:text-5xl font-medium text-gray-gradient mb-6">
+              Let's Work Together
+            </h2>
+            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+              Have a project in mind? I'd love to hear about it. Send me a message 
+              and let's create something amazing together.
+            </p>
 
-          <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
-            {categories.map((category) => (
-              <StaggerItem key={category.name}>
-                <Link
-                  href={`/category/${category.name.toLowerCase()}`}
-                  className="group block"
-                >
-                  <div className="p-8 rounded-2xl border border-border/50 bg-card/50 text-center gradient-border hover-lift transition-all duration-300">
-                    <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-primary flex items-center justify-center">
-                      <category.icon className="w-7 h-7 text-primary-foreground" />
-                    </div>
-                    <h3 className="text-lg font-medium mb-1">{category.name}</h3>
-                    <p className="text-sm text-muted-foreground">{category.count} articles</p>
-                  </div>
-                </Link>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="py-24 relative">
-        <div className="container mx-auto px-4 md:px-6">
-          <FadeIn>
-            <div className="max-w-2xl mx-auto text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-primary flex items-center justify-center">
-                <BookOpen className="w-8 h-8 text-primary-foreground" />
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl font-medium mb-4">
-                Stay Updated
-              </h2>
-              
-              <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                Subscribe to get notified about new articles, insights, and exclusive content.
-              </p>
-              
-              <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-5 py-3 rounded-full bg-card border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-                <Button
-                  type="submit"
-                  className="bg-gradient-primary hover:opacity-90 text-primary-foreground rounded-full px-8"
-                >
-                  Subscribe
-                </Button>
-              </form>
+            {/* Social Links */}
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <a 
+                href="https://github.com/vaibhavk" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-icon hover:bg-primary/10 hover:border-primary transition-colors"
+              >
+                <Github className="w-6 h-6" />
+              </a>
+              <a 
+                href="https://linkedin.com/in/vaibhavkandhway" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-icon hover:bg-primary/10 hover:border-primary transition-colors"
+              >
+                <Linkedin className="w-6 h-6" />
+              </a>
+              <a 
+                href="https://vaibhav.dev" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-icon hover:bg-primary/10 hover:border-primary transition-colors"
+              >
+                <Globe className="w-6 h-6" />
+              </a>
             </div>
-          </FadeIn>
+
+            {/* CTA */}
+            <Button size="lg" className="bg-gradient-primary hover:opacity-90 rounded-full px-8" asChild>
+              <Link href="mailto:vaibhav@example.com">
+                <Mail className="w-5 h-5 mr-2" />
+                Send a Message
+              </Link>
+            </Button>
+          </motion.div>
         </div>
       </section>
     </div>

@@ -113,3 +113,5 @@ export function GlowCard({
     </div>
   );
 }
+
+export { CursorFollower } from './cursor-follower';

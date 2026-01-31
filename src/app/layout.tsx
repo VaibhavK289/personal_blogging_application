@@ -5,6 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { NoiseOverlay } from "@/components/effects";
+import { SmoothScrollProvider } from "@/components/providers";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -61,12 +62,14 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col bg-background`}
       >
-        <NoiseOverlay opacity={0.015} />
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <SmoothScrollProvider>
+          <NoiseOverlay opacity={0.015} />
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </SmoothScrollProvider>
         <Analytics />
       </body>
     </html>

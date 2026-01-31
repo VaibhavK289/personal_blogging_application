@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SearchDialog } from '@/components/search-dialog';
+import { SearchDialog } from '@/components/search/search-dialog';
 import {
   Sheet,
   SheetContent,
