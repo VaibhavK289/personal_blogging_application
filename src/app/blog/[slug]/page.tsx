@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,8 +12,9 @@ import { GradientBlob, GlowCard } from '@/components/effects';
 import { 
   Clock, Calendar, ArrowLeft, 
   Twitter, Linkedin, Facebook, Link2, 
-  ChevronUp, BookOpen
+  ChevronUp, BookOpen, Sparkles
 } from 'lucide-react';
+import { getPostBySlug } from '@/lib/blog-store';
 
 // Mock post data
 const postData = {
@@ -104,9 +106,26 @@ const tocItems = [
 ];
 
 export default function BlogPostPage() {
+  const params = useParams();
+  const slug = params?.slug as string;
   const [activeSection] = useState('');
   const articleRef = useRef<HTMLElement>(null);
   
+  // Get post data - check user posts first, then fall back to mock
+  const currentPost = useMemo(() => {
+    const userPost = typeof window !== 'undefined' ? getPostBySlug(slug) : null;
+    if (userPost) {
+      return {
+        ...userPost,
+        author: {
+          name: 'You',
+          avatar: '/avatar.jpg',
+        },
+      };
+    }
+    return { ...postData, isUserCreated: false }; // Fall back to mock data
+  }, [slug]);
+
   // Reading progress
   const { scrollYProgress } = useScroll({
     target: articleRef,
@@ -123,6 +142,9 @@ export default function BlogPostPage() {
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
   };
+
+  // Check if this is a user-created post
+  const isUserPost = currentPost.isUserCreated;
 
   return (
     <div className="relative min-h-screen">
@@ -191,20 +213,29 @@ export default function BlogPostPage() {
             <FadeIn>
               <header className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
+                  {isUserPost && (
+                    <Badge 
+                      variant="secondary" 
+                      className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white border-0"
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Your Post
+                    </Badge>
+                  )}
                   <Badge 
                     variant="secondary" 
                     className="bg-primary/10 text-primary border-0"
                   >
-                    {postData.category}
+                    {currentPost.category}
                   </Badge>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
-                      {postData.readTime}
+                      {currentPost.readTime}
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      {new Date(postData.date).toLocaleDateString('en-US', { 
+                      {new Date(currentPost.date).toLocaleDateString('en-US', { 
                         month: 'long', 
                         day: 'numeric',
                         year: 'numeric'
@@ -217,16 +248,16 @@ export default function BlogPostPage() {
                   className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
                   style={{ fontFamily: 'var(--font-outfit)' }}
                 >
-                  {postData.title}
+                  {currentPost.title}
                 </h1>
                 
                 <p className="text-xl text-muted-foreground mb-6">
-                  {postData.excerpt}
+                  {currentPost.excerpt}
                 </p>
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {postData.tags.map((tag) => (
+                  {currentPost.tags.map((tag) => (
                     <Link
                       key={tag}
                       href={`/tag/${tag.toLowerCase().replace(/\s+/g, '-')}`}
@@ -244,37 +275,44 @@ export default function BlogPostPage() {
             {/* Article Content */}
             <FadeIn delay={0.1}>
               <div className="prose-blog">
-                {/* Rendering the content as markdown would go here */}
-                <section id="introduction">
-                  <h2>Introduction</h2>
-                  <p>
-                    Next.js 14 represents a significant leap forward in the React ecosystem, bringing powerful features that make building modern web applications more intuitive and performant than ever before.
-                  </p>
-                </section>
+                {isUserPost ? (
+                  /* User-created post content */
+                  <div className="whitespace-pre-wrap">
+                    {currentPost.content}
+                  </div>
+                ) : (
+                  /* Mock post content - static demo */
+                  <>
+                    <section id="introduction">
+                      <h2>Introduction</h2>
+                      <p>
+                        Next.js 14 represents a significant leap forward in the React ecosystem, bringing powerful features that make building modern web applications more intuitive and performant than ever before.
+                      </p>
+                    </section>
 
-                <section id="the-app-router-revolution">
-                  <h2>The App Router Revolution</h2>
-                  <p>
-                    The App Router, introduced in Next.js 13 and refined in 14, fundamentally changes how we think about routing in React applications. With file-based routing that supports layouts, loading states, and error boundaries out of the box, developers can create sophisticated navigation patterns with minimal boilerplate.
-                  </p>
+                    <section id="the-app-router-revolution">
+                      <h2>The App Router Revolution</h2>
+                      <p>
+                        The App Router, introduced in Next.js 13 and refined in 14, fundamentally changes how we think about routing in React applications. With file-based routing that supports layouts, loading states, and error boundaries out of the box, developers can create sophisticated navigation patterns with minimal boilerplate.
+                      </p>
 
-                  <section id="key-features">
-                    <h3>Key Features</h3>
-                    <ul>
-                      <li><strong>Server Components</strong>: By default, components in the App Router are server components, enabling better performance and smaller client bundles.</li>
-                      <li><strong>Streaming</strong>: Progressive rendering with Suspense boundaries allows for faster initial page loads.</li>
-                      <li><strong>Parallel Routes</strong>: Build complex dashboard layouts with independent loading states.</li>
-                    </ul>
-                  </section>
-                </section>
+                      <section id="key-features">
+                        <h3>Key Features</h3>
+                        <ul>
+                          <li><strong>Server Components</strong>: By default, components in the App Router are server components, enabling better performance and smaller client bundles.</li>
+                          <li><strong>Streaming</strong>: Progressive rendering with Suspense boundaries allows for faster initial page loads.</li>
+                          <li><strong>Parallel Routes</strong>: Build complex dashboard layouts with independent loading states.</li>
+                        </ul>
+                      </section>
+                    </section>
 
-                <section id="server-actions">
-                  <h2>Server Actions</h2>
-                  <p>
-                    One of the most exciting additions in Next.js 14 is stable Server Actions. These allow you to define server-side functions that can be called directly from your components.
-                  </p>
-                  <pre>
-                    <code>{`async function createPost(formData: FormData) {
+                    <section id="server-actions">
+                      <h2>Server Actions</h2>
+                      <p>
+                        One of the most exciting additions in Next.js 14 is stable Server Actions. These allow you to define server-side functions that can be called directly from your components.
+                      </p>
+                      <pre>
+                        <code>{`async function createPost(formData: FormData) {
   'use server'
   
   const title = formData.get('title')
@@ -284,28 +322,30 @@ export default function BlogPostPage() {
     data: { title, content }
   })
 }`}</code>
-                  </pre>
-                </section>
+                      </pre>
+                    </section>
 
-                <section id="performance-improvements">
-                  <h2>Performance Improvements</h2>
-                  <p>Next.js 14 includes significant performance improvements:</p>
-                  <ol>
-                    <li><strong>Turbopack</strong>: The new Rust-based bundler is now stable for development</li>
-                    <li><strong>Partial Prerendering</strong>: Combine static and dynamic content seamlessly</li>
-                    <li><strong>Improved Caching</strong>: More granular control over data caching strategies</li>
-                  </ol>
-                </section>
+                    <section id="performance-improvements">
+                      <h2>Performance Improvements</h2>
+                      <p>Next.js 14 includes significant performance improvements:</p>
+                      <ol>
+                        <li><strong>Turbopack</strong>: The new Rust-based bundler is now stable for development</li>
+                        <li><strong>Partial Prerendering</strong>: Combine static and dynamic content seamlessly</li>
+                        <li><strong>Improved Caching</strong>: More granular control over data caching strategies</li>
+                      </ol>
+                    </section>
 
-                <section id="conclusion">
-                  <h2>Conclusion</h2>
-                  <p>
-                    Next.js 14 makes it easier than ever to build fast, scalable web applications. The combination of Server Components, Server Actions, and improved developer experience creates a compelling platform for modern web development.
-                  </p>
-                  <p>
-                    Whether you&apos;re building a simple blog or a complex enterprise application, Next.js 14 provides the tools you need to succeed.
-                  </p>
-                </section>
+                    <section id="conclusion">
+                      <h2>Conclusion</h2>
+                      <p>
+                        Next.js 14 makes it easier than ever to build fast, scalable web applications. The combination of Server Components, Server Actions, and improved developer experience creates a compelling platform for modern web development.
+                      </p>
+                      <p>
+                        Whether you&apos;re building a simple blog or a complex enterprise application, Next.js 14 provides the tools you need to succeed.
+                      </p>
+                    </section>
+                  </>
+                )}
               </div>
             </FadeIn>
 

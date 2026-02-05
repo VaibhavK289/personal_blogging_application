@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchDialog } from '@/components/search/search-dialog';
 import {
@@ -16,6 +16,7 @@ import {
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/blog', label: 'Blog' },
+  { href: '/write', label: 'Write', icon: true },
   { href: '/archive', label: 'Archive' },
   { href: '/about', label: 'About' },
 ];
@@ -72,8 +73,11 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative text-sm text-muted-foreground hover:text-foreground transition-colors link-underline py-1"
+                className={`relative text-sm text-muted-foreground hover:text-foreground transition-colors link-underline py-1 ${
+                  link.icon ? 'flex items-center gap-1.5' : ''
+                }`}
               >
+                {link.icon && <PenLine className="w-3.5 h-3.5" />}
                 {link.label}
               </Link>
             ))}

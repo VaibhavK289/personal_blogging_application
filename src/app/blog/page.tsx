@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { FadeIn, StaggerContainer, StaggerItem, ScaleOnHover } from '@/components/motion';
 import { GradientBlob, GlowCard } from '@/components/effects';
-import { Search, Clock, Calendar, ArrowRight } from 'lucide-react';
+import { Search, Clock, Calendar, ArrowRight, Sparkles } from 'lucide-react';
+import { getUserPosts } from '@/lib/blog-store';
 
 // Mock blog posts data
 const allPosts = [
@@ -79,13 +80,33 @@ const allPosts = [
   },
 ];
 
-const categories = ['All', 'Technology', 'Design', 'Productivity'];
+const categories = ['All', 'Technology', 'Design', 'Productivity', 'Lifestyle', 'Tutorial'];
+
+
 
 export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const filteredPosts = allPosts.filter((post) => {
+  // Combine user posts with mock posts using useMemo
+  const combinedPosts = useMemo(() => {
+    const userPosts = typeof window !== 'undefined' ? getUserPosts() : [];
+    return [
+      ...userPosts,
+      ...allPosts.map(post => ({ ...post, isUserCreated: false as const })),
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
+
+  // Refresh posts when tab becomes visible (in case user created a post in another tab)
+  useEffect(() => {
+    const handleFocus = () => setRefreshKey(k => k + 1);
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  const filteredPosts = combinedPosts.filter((post) => {
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
@@ -152,6 +173,15 @@ export default function BlogPage() {
                 <GlowCard className="h-full" glowColor="primary">
                   <Link href={`/blog/${post.slug}`} className="block p-6 h-full">
                     <div className="flex items-center gap-2 mb-4 flex-wrap">
+                      {post.isUserCreated && (
+                        <Badge 
+                          variant="secondary" 
+                          className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white border-0"
+                        >
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          New
+                        </Badge>
+                      )}
                       <Badge 
                         variant="secondary" 
                         className="bg-primary/10 text-primary border-0"
