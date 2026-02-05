@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { GradientBlob } from '@/components/effects';
+import { RichTextEditor } from '@/components/blog/rich-text-editor';
 import { createPost } from '@/lib/blog-store';
 import { 
   ArrowLeft, 
@@ -201,9 +202,10 @@ export function BlogEditor() {
                 {formData.excerpt || 'No excerpt provided'}
               </p>
               
-              <div className="whitespace-pre-wrap">
-                {formData.content || 'Start writing your content...'}
-              </div>
+              <div 
+                className="prose-blog"
+                dangerouslySetInnerHTML={{ __html: formData.content || '<p>Start writing your content...</p>' }}
+              />
             </div>
           ) : (
             /* Edit Mode */
@@ -310,19 +312,10 @@ export function BlogEditor() {
                 <label className="block text-sm text-muted-foreground mb-2">
                   Content
                 </label>
-                <textarea
-                  placeholder="Start writing your blog post content here...
-
-You can write in plain text or use markdown formatting:
-- **bold** for emphasis
-- *italic* for subtle emphasis  
-- Lists, headings, and more!"
-                  value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  rows={20}
-                  className={`w-full px-4 py-4 rounded-xl bg-card/30 border border-border/50 focus:outline-none focus:border-primary placeholder:text-muted-foreground/50 resize-y min-h-[400px] ${
-                    errors.content ? 'border-red-500' : ''
-                  }`}
+                <RichTextEditor
+                  content={formData.content}
+                  onChange={(content) => setFormData(prev => ({ ...prev, content }))}
+                  placeholder="Start writing your blog post..."
                 />
                 {errors.content && (
                   <p className="text-red-500 text-sm mt-1">{errors.content}</p>

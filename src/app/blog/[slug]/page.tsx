@@ -276,10 +276,11 @@ export default function BlogPostPage() {
             <FadeIn delay={0.1}>
               <div className="prose-blog">
                 {isUserPost ? (
-                  /* User-created post content */
-                  <div className="whitespace-pre-wrap">
-                    {currentPost.content}
-                  </div>
+                  /* User-created post content - render HTML from rich text editor */
+                  <div 
+                    className="prose-user-content"
+                    dangerouslySetInnerHTML={{ __html: currentPost.content }}
+                  />
                 ) : (
                   /* Mock post content - static demo */
                   <>
